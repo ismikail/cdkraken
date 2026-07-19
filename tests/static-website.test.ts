@@ -56,21 +56,28 @@ describe('custom domains', () => {
     );
   });
 
-  it('outputs the CloudFront domain', () => {
-    const outputs = synth().findOutputs('*');
-    const values = Object.values(outputs);
+  it('outputs the CloudFront domain and the origin bucket name', () => {
+    const values = Object.values(synth().findOutputs('*'));
 
-    expect(values).toHaveLength(1);
-    expect(values[0].Value).toEqual({'Fn::GetAtt': [expect.stringContaining('SiteDistribution'), 'DomainName']});
+    expect(values).toHaveLength(2);
+    expect(values).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          Value: {'Fn::GetAtt': [expect.stringContaining('SiteDistribution'), 'DomainName']},
+        }),
+        expect.objectContaining({Value: {Ref: expect.stringContaining('SiteBucket')}}),
+      ]),
+    );
   });
 
-  it('scopes the output so two sites in one stack do not collide', () => {
+  it('scopes outputs so two sites in one stack do not collide', () => {
     const stack = new Stack(new App(), 'TestStack', {env: {account: '111111111111', region: 'us-east-1'}});
     for (const id of ['Marketing', 'Docs']) {
       new StaticWebsite(stack, id, {buildPath, domainNames: undefined, certificate: undefined});
     }
 
-    expect(Object.keys(Template.fromStack(stack).findOutputs('*'))).toHaveLength(2);
+    // Two per site; a stack-scoped output would have collided on the second.
+    expect(Object.keys(Template.fromStack(stack).findOutputs('*'))).toHaveLength(4);
   });
 
   it('still applies routing and caching without a certificate', () => {

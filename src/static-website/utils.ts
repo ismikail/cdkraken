@@ -1,6 +1,6 @@
 import {Duration} from 'aws-cdk-lib';
 import type {ErrorResponse} from 'aws-cdk-lib/aws-cloudfront';
-import {SiteRouting} from './interface';
+import {SiteRouting} from './interfaces';
 
 /**
  * Does the final path segment contain a dot?

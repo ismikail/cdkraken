@@ -1,8 +1,8 @@
-import {Duration, RemovalPolicy} from 'aws-cdk-lib';
+import {CfnOutput, Duration, RemovalPolicy} from 'aws-cdk-lib';
 import {BlockPublicAccess, Bucket, BucketEncryption} from 'aws-cdk-lib/aws-s3';
 import {BucketDeployment, CacheControl, Source} from 'aws-cdk-lib/aws-s3-deployment';
 import type {Construct} from 'constructs';
-import type {DeployStaticWebsiteOptions, SiteBucketProps} from './interface';
+import type {DeployStaticWebsiteOptions, SiteBucketProps} from './interfaces';
 import {toDeploymentGlob} from './utils';
 
 /** One year, the maximum meaningful `max-age` for content-hashed assets. */
@@ -39,6 +39,14 @@ export class SiteBucket extends Bucket {
 
     this.buildPath = buildPath;
     this.immutablePaths = immutablePaths;
+
+    // Scoped to `this`, so the logical ID stays unique when a stack holds more
+    // than one site. The name is generated, so this is how you find the bucket
+    // to inspect what was actually uploaded.
+    new CfnOutput(this, 'Name', {
+      value: this.bucketName,
+      description: 'Origin bucket holding the static build.',
+    });
   }
 
   /**

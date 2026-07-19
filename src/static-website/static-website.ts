@@ -1,5 +1,5 @@
 import {Construct} from 'constructs';
-import {SITE_PRESETS, type StaticWebsiteProps} from './interface';
+import {SITE_PRESETS, type StaticWebsiteProps} from './interfaces';
 import {SiteBucket} from './site-bucket';
 import {SiteDistribution} from './site-distribution';
 

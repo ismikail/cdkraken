@@ -13,7 +13,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import {S3BucketOrigin} from 'aws-cdk-lib/aws-cloudfront-origins';
 import type {Construct} from 'constructs';
-import {type SiteDistributionProps, SiteRouting} from './interface';
+import {type SiteDistributionProps, SiteRouting} from './interfaces';
 import {RoutingFunctionJs} from './routing-function-js';
 import {needsRoutingFunction, SPA_FALLBACK} from './utils';
 

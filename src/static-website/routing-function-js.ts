@@ -5,7 +5,7 @@ import {
   FunctionRuntime,
 } from 'aws-cdk-lib/aws-cloudfront';
 import type {Construct} from 'constructs';
-import type {SiteRouting} from './interface';
+import type {SiteRouting} from './interfaces';
 import {ROUTING_CODE} from './utils';
 
 /**

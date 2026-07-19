@@ -1,4 +1,4 @@
-export * from './interface';
+export * from './interfaces';
 export * from './routing-function-js';
 export * from './site-bucket';
 export * from './site-distribution';
