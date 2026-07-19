@@ -36,6 +36,50 @@ function synth(props: Partial<Parameters<typeof StaticWebsite.prototype.construc
   return Template.fromStack(stack);
 }
 
+describe('custom domains', () => {
+  it('serves on the generated CloudFront domain when no certificate is given', () => {
+    // Omitting both is the preview / internal-environment shape.
+    const template = synth({certificate: undefined, domainNames: undefined});
+    const dist = Object.values(template.findResources('AWS::CloudFront::Distribution'))[0];
+
+    // Both properties are omitted entirely; CloudFront then falls back to the
+    // generated domain and its own certificate.
+    expect(dist.Properties.DistributionConfig.Aliases).toBeUndefined();
+    expect(dist.Properties.DistributionConfig.ViewerCertificate).toBeUndefined();
+  });
+
+  it('rejects domain names without a certificate at synth time', () => {
+    // CloudFront refuses aliases with no ACM certificate, but CDK does not
+    // check — left alone this surfaces part-way through a deploy instead.
+    expect(() => synth({certificate: undefined, domainNames: ['example.com']})).toThrow(
+      /domainNames \(example\.com\) requires a certificate/,
+    );
+  });
+
+  it('outputs the CloudFront domain', () => {
+    const outputs = synth().findOutputs('*');
+    const values = Object.values(outputs);
+
+    expect(values).toHaveLength(1);
+    expect(values[0].Value).toEqual({'Fn::GetAtt': [expect.stringContaining('SiteDistribution'), 'DomainName']});
+  });
+
+  it('scopes the output so two sites in one stack do not collide', () => {
+    const stack = new Stack(new App(), 'TestStack', {env: {account: '111111111111', region: 'us-east-1'}});
+    for (const id of ['Marketing', 'Docs']) {
+      new StaticWebsite(stack, id, {buildPath, domainNames: undefined, certificate: undefined});
+    }
+
+    expect(Object.keys(Template.fromStack(stack).findOutputs('*'))).toHaveLength(2);
+  });
+
+  it('still applies routing and caching without a certificate', () => {
+    const template = synth({certificate: undefined, domainNames: undefined});
+    template.resourceCountIs('AWS::CloudFront::Function', 1);
+    template.resourceCountIs('Custom::CDKBucketDeployment', 2);
+  });
+});
+
 describe('StaticWebsite', () => {
   it('keeps the origin bucket private and encrypted', () => {
     synth().hasResourceProperties('AWS::S3::Bucket', {

@@ -24,8 +24,30 @@ new StaticWebsite(this, 'Site', {
 });
 ```
 
-That is the SvelteKit `adapter-static` default. No DNS records are created —
-read `site.distributionDomainName` and point your provider at it.
+That is the SvelteKit `adapter-static` default. No DNS records are created — the
+CloudFront domain is emitted as a stack output, and also available as
+`site.distributionDomainName`. Point your provider at it.
+
+### Custom domains are optional
+
+Omit `certificate` and `domainNames` and the site is served on the generated
+`*.cloudfront.net` domain under CloudFront's own certificate — the usual shape
+for a preview or internal environment:
+
+```ts
+new StaticWebsite(this, 'Preview', {
+  buildPath: path.join(__dirname, '../../web/build'),
+});
+```
+
+They go together: passing `domainNames` without a `certificate` throws at synth.
+CloudFront will not serve an alternate domain name without an ACM certificate
+covering it, and CDK does not check for this — left alone it surfaces part-way
+through a CloudFormation deploy instead of immediately.
+
+The certificate must be in **us-east-1**. If your stack is in another region,
+define it in a us-east-1 stack and pass it across with
+`crossRegionReferences: true`.
 
 ### Framework support
 

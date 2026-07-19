@@ -114,10 +114,20 @@ export interface StaticWebsiteProps {
    * **Must live in us-east-1** — a CloudFront requirement. If your site stack
    * is in another region, define the certificate in a us-east-1 stack and pass
    * it across with `crossRegionReferences: true`.
+   *
+   * Required whenever {@link domainNames} is set, and pointless without it.
+   *
+   * @default - none; the site is served on the default `*.cloudfront.net`
+   * domain using CloudFront's own certificate
    */
-  readonly certificate: ICertificate;
-  /** Domains served, e.g. `['example.com', 'www.example.com']`. */
-  readonly domainNames: string[];
+  readonly certificate?: ICertificate;
+  /**
+   * Domains served, e.g. `['example.com', 'www.example.com']`. Requires
+   * {@link certificate}.
+   *
+   * @default - none; only the generated `*.cloudfront.net` domain
+   */
+  readonly domainNames?: string[];
   /**
    * Framework preset supplying {@link routing} and {@link immutablePaths}.
    * Either explicit value overrides the preset. Defaults to
@@ -136,10 +146,19 @@ export interface StaticWebsiteProps {
 export interface SiteDistributionProps {
   /** Origin bucket holding the static build (served via OAC). */
   readonly originBucket: IBucket;
-  /** ACM certificate (must live in us-east-1 for CloudFront). */
-  readonly certificate: ICertificate;
-  /** Domains served by the distribution. */
-  readonly domainNames: string[];
+  /**
+   * ACM certificate (must live in us-east-1 for CloudFront). Required whenever
+   * {@link domainNames} is set.
+   *
+   * @default - none; served on the default `*.cloudfront.net` domain
+   */
+  readonly certificate?: ICertificate;
+  /**
+   * Domains served by the distribution. Requires {@link certificate}.
+   *
+   * @default - none; only the generated `*.cloudfront.net` domain
+   */
+  readonly domainNames?: string[];
   /** Path-to-object convention. Defaults to {@link SiteRouting.DIRECTORY_INDEX}. */
   readonly routing?: SiteRouting;
   /** Optional console comment. */
