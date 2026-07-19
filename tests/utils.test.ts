@@ -1,4 +1,4 @@
-import {needsRoutingFunction, ROUTING_CODE, SiteRouting, toDeploymentGlob} from '../src';
+import {needsRoutingFunction, ROUTING_CODE, SiteRouting, SPA_FALLBACK, toDeploymentGlob} from '../src';
 
 describe('needsRoutingFunction', () => {
   it.each([
@@ -27,6 +27,23 @@ describe('ROUTING_CODE', () => {
     // CloudFront Functions run a constrained runtime — these would fail there.
     const code = ROUTING_CODE[routing] as string;
     expect(code).not.toMatch(/=>|\bconst\b|\blet\b|endsWith|includes|`/);
+  });
+});
+
+describe('SPA_FALLBACK', () => {
+  it('maps 403 as well as 404', () => {
+    // A private OAC-fronted bucket answers a missing key with 403, not 404 —
+    // covering only 404 would leave every SPA deep link broken.
+    expect(SPA_FALLBACK.map((r) => r.httpStatus).sort()).toEqual([403, 404]);
+  });
+
+  it('rewrites to index.html with a 200 and no caching', () => {
+    for (const response of SPA_FALLBACK) {
+      expect(response.responseHttpStatus).toBe(200);
+      expect(response.responsePagePath).toBe('/index.html');
+      // Non-zero would keep serving a stale fallback after a fixing deploy.
+      expect(response.ttl?.toSeconds()).toBe(0);
+    }
   });
 });
 

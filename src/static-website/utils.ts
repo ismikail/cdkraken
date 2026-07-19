@@ -1,3 +1,5 @@
+import {Duration} from 'aws-cdk-lib';
+import type {ErrorResponse} from 'aws-cdk-lib/aws-cloudfront';
 import {SiteRouting} from './interface';
 
 /**
@@ -66,6 +68,23 @@ ${LAST_SEGMENT_HAS_DOT}
 export function needsRoutingFunction(routing: SiteRouting): boolean {
   return ROUTING_CODE[routing] !== undefined;
 }
+
+/**
+ * Custom error responses implementing {@link SiteRouting.SPA}: serve
+ * `/index.html` with a 200 for any path the origin could not produce, letting
+ * the client-side router take over.
+ *
+ * Both codes are mapped because an OAC-fronted private bucket answers a missing
+ * key with 403, not 404 — S3 will not confirm the key is absent without
+ * `s3:ListBucket`. The TTL is zero so a real deploy fixes a stale fallback
+ * immediately.
+ */
+export const SPA_FALLBACK: ErrorResponse[] = [403, 404].map((httpStatus) => ({
+  httpStatus,
+  responseHttpStatus: 200,
+  responsePagePath: '/index.html',
+  ttl: Duration.seconds(0),
+}));
 
 /**
  * Normalise an immutable path into a `BucketDeployment` glob.

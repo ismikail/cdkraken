@@ -1,9 +1,7 @@
-import {Duration} from 'aws-cdk-lib';
 import {
   AllowedMethods,
   CachePolicy,
   Distribution,
-  type ErrorResponse,
   FunctionEventType,
   HttpVersion,
   PriceClass,
@@ -16,22 +14,7 @@ import {S3BucketOrigin} from 'aws-cdk-lib/aws-cloudfront-origins';
 import type {Construct} from 'constructs';
 import {type SiteDistributionProps, SiteRouting} from './interface';
 import {RoutingFunctionJs} from './routing-function-js';
-import {needsRoutingFunction} from './utils';
-
-/**
- * Serve `/index.html` with a 200 for any path the origin could not produce.
- *
- * Both codes are mapped because an OAC-fronted private bucket answers a missing
- * key with 403, not 404 — S3 will not confirm the key is absent without
- * `s3:ListBucket`. The TTL is zero so a real deploy fixes a stale fallback
- * immediately.
- */
-const SPA_FALLBACK: ErrorResponse[] = [403, 404].map((httpStatus) => ({
-  httpStatus,
-  responseHttpStatus: 200,
-  responsePagePath: '/index.html',
-  ttl: Duration.seconds(0),
-}));
+import {needsRoutingFunction, SPA_FALLBACK} from './utils';
 
 /**
  * CloudFront distribution for a static site on a private S3 origin.
