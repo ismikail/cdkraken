@@ -93,8 +93,14 @@ A few conventions the existing code follows:
 
 - **One folder per domain** under `src/`, named after its headline construct
   (`src/static-website/` → `StaticWebsite`). Each holds an `index.ts` barrel, an
-  `interfaces.ts` with the props and enums, a `utils.ts` for pure helpers, and a
-  file per construct. `src/index.ts` re-exports the barrels.
+  `interfaces.ts` with the props and enums, a `utils.ts` for pure helpers, a
+  `README.md` documenting the domain, and a file per construct. `src/index.ts`
+  re-exports the barrels.
+- **Domain docs live with the domain.** The root `README.md` stays a catalogue —
+  what exists, how to install, the principles. Anything specific to one area
+  (routing modes, caching behaviour, framework presets) belongs in that folder's
+  `README.md`, linked from the catalogue table. A new domain adds a row there,
+  not a section.
 - **Pure logic goes in `utils.ts`, not inside a construct.** Helpers like
   `needsRoutingFunction` and `toDeploymentGlob` are plain functions, so they can
   be unit-tested without synthesizing a stack.
