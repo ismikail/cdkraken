@@ -1,0 +1,6 @@
+# The default shell node may predate what the tooling requires, so pick up the
+# version in .nvmrc when nvm is available.
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use --silent 2>/dev/null
+
+npx biome check --staged --no-errors-on-unmatched

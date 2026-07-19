@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '.github/**'
+      - 'docs/**'
+      - '*.md'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run (resolve the next version, publish nothing)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write      # push the version commit, tag and GitHub release
+  issues: write        # comment on issues closed by the release
+  pull-requests: write # comment on the PRs it ships
+  id-token: write      # npm provenance attestation
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Semantic release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Semantic release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release ${{ inputs.dry-run && '--dry-run' || '' }}
