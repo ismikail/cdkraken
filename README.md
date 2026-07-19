@@ -8,16 +8,16 @@ npm install cdkraken
 
 Requires `aws-cdk-lib` ^2.257.0 and `constructs` ^10.5.0 as peer dependencies.
 
-## `AppWebsite`
+## `StaticWebsite`
 
 A complete static website on AWS: a private, encrypted S3 origin, a CloudFront
 distribution in front of it via OAC, framework-appropriate route handling, and a
 cache-aware upload of your build.
 
 ```ts
-import {AppWebsite} from 'cdkraken';
+import {StaticWebsite} from 'cdkraken';
 
-new AppWebsite(this, 'Site', {
+new StaticWebsite(this, 'Site', {
   buildPath: path.join(__dirname, '../../web/build'),
   certificate, // ACM certificate, must be in us-east-1
   domainNames: ['example.com', 'www.example.com'],
@@ -35,9 +35,9 @@ map onto emitted files, and where the content-hashed assets live. Both are
 configuration.
 
 ```ts
-import {AppWebsite, SITE_PRESETS} from 'cdkraken';
+import {StaticWebsite, SITE_PRESETS} from 'cdkraken';
 
-new AppWebsite(this, 'Site', {
+new StaticWebsite(this, 'Site', {
   buildPath: path.join(__dirname, '../../app/dist'),
   certificate,
   domainNames: ['app.example.com'],
@@ -74,6 +74,13 @@ OAC-fronted bucket answers a missing key with **403**, not 404, because
 `/index.html` with a 200. The trade-off is inherent to SPA hosting: a genuinely
 missing `/assets/typo.js` also returns `index.html` rather than a 404.
 
+The rewrite Function is pinned to the `cloudfront-js-2.0` runtime. Left unset,
+CDK picks the runtime from the `@aws-cdk/aws-cloudfront:defaultRuntimeVersionV2_0`
+feature flag in the *consuming* app's `cdk.json` — meaning the same construct
+would deploy on 1.0 in one repo and 2.0 in another. A library should not inherit
+that. Pass `runtime` to `RoutingFunctionJs` if you need 1.0. The handler code
+itself stays ES5-safe, so it runs correctly on either.
+
 ### Caching
 
 When `immutablePaths` is non-empty the build is uploaded in two passes:
@@ -96,13 +103,13 @@ Static hosting only. A framework running server-side — SvelteKit
 
 | Construct | Purpose |
 | --- | --- |
-| `AppWebsite` | The whole site: bucket + distribution + deployment |
+| `StaticWebsite` | The whole site: bucket + distribution + deployment |
 | `SiteBucket` | Private encrypted origin bucket with cache-aware upload |
 | `SiteDistribution` | CloudFront distribution with OAC and route handling |
-| `RoutingFunction` | The viewer-request rewrite Function on its own |
+| `RoutingFunctionJs` | The viewer-request rewrite Function on its own |
 
 The pieces are exported individually, so you can assemble them yourself when
-`AppWebsite` does not fit.
+`StaticWebsite` does not fit.
 
 ## Contributing
 

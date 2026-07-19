@@ -52,7 +52,7 @@ reads the commits merged into `main` and decides what to publish. The format is
 | --- | --- |
 | `fix: correct the SPA fallback status code` | patch — `1.0.0` → `1.0.1` |
 | `feat: add HTML_EXTENSION routing` | minor — `1.0.0` → `1.1.0` |
-| `feat!: rename AppWebsiteProps.buildPath` | major — `1.0.0` → `2.0.0` |
+| `feat!: rename StaticWebsiteProps.buildPath` | major — `1.0.0` → `2.0.0` |
 | `docs: clarify the caching trade-off` | none |
 
 A `!` before the colon, or a `BREAKING CHANGE:` footer, triggers a major bump.
@@ -91,12 +91,21 @@ Two consequences worth knowing:
 
 A few conventions the existing code follows:
 
-- **One folder per domain** under `src/`, each with an `index.ts` barrel and an
-  `interface.ts` holding the props and enums. `src/index.ts` re-exports the
-  barrels.
+- **One folder per domain** under `src/`, named after its headline construct
+  (`src/static-website/` → `StaticWebsite`). Each holds an `index.ts` barrel, an
+  `interface.ts` with the props and enums, a `utils.ts` for pure helpers, and a
+  file per construct. `src/index.ts` re-exports the barrels.
+- **Pure logic goes in `utils.ts`, not inside a construct.** Helpers like
+  `needsRoutingFunction` and `toDeploymentGlob` are plain functions, so they can
+  be unit-tested without synthesizing a stack.
+- **Never inherit a default from the consumer's `cdk.json`.** Several CDK
+  defaults resolve through feature flags, so an unset prop can deploy
+  differently in someone else's app than in ours — the CloudFront Function
+  runtime is one such case. Pin the value explicitly and let callers override
+  it.
 - **Props are `readonly`** and documented with JSDoc. The docs site is generated
   from those comments, so they are the public documentation.
-- **Prefer configuration over per-framework classes.** `AppWebsite` takes a
+- **Prefer configuration over per-framework classes.** `StaticWebsite` takes a
   `SiteRouting` strategy rather than shipping `SvelteWebsite` and
   `ReactWebsite`, because the CDN-level difference between those frameworks is
   exactly one routing convention plus an asset directory. New framework support

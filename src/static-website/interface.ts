@@ -50,7 +50,7 @@ export enum SiteRouting {
 
 /**
  * Routing plus content-hashed asset locations for a given framework's default
- * static build. Consumed by {@link AppWebsite} via `preset`.
+ * static build. Consumed by {@link StaticWebsite} via `preset`.
  */
 export interface SitePreset {
   /** Path-to-object convention the build emits. */
@@ -104,8 +104,8 @@ export const SITE_PRESETS = {
   },
 } as const satisfies Record<string, SitePreset>;
 
-/** Properties for {@link AppWebsite}. */
-export interface AppWebsiteProps {
+/** Properties for {@link StaticWebsite}. */
+export interface StaticWebsiteProps {
   /** Path to the static build directory to serve (e.g. `web/build`). */
   readonly buildPath: string;
   /**

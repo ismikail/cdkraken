@@ -15,7 +15,8 @@ import {
 import {S3BucketOrigin} from 'aws-cdk-lib/aws-cloudfront-origins';
 import type {Construct} from 'constructs';
 import {type SiteDistributionProps, SiteRouting} from './interface';
-import {needsRoutingFunction, RoutingFunction} from './routing-function';
+import {RoutingFunctionJs} from './routing-function-js';
+import {needsRoutingFunction} from './utils';
 
 /**
  * Serve `/index.html` with a 200 for any path the origin could not produce.
@@ -58,7 +59,7 @@ export class SiteDistribution extends Distribution {
     const functionAssociations = needsRoutingFunction(routing)
       ? [
           {
-            function: new RoutingFunction(scope, `${id}Routing`, routing),
+            function: new RoutingFunctionJs(scope, `${id}Routing`, routing),
             eventType: FunctionEventType.VIEWER_REQUEST,
           },
         ]

@@ -1,6 +1,7 @@
 import {App, Stack} from 'aws-cdk-lib';
-import {Template} from 'aws-cdk-lib/assertions';
-import {needsRoutingFunction, RoutingFunction, SiteRouting} from '../src';
+import {Match, Template} from 'aws-cdk-lib/assertions';
+import {FunctionRuntime} from 'aws-cdk-lib/aws-cloudfront';
+import {DEFAULT_ROUTING_FUNCTION_RUNTIME, RoutingFunctionJs, SiteRouting} from '../src';
 
 /**
  * Extract the inline handler and run it, so the rewrite rules are tested as
@@ -8,7 +9,7 @@ import {needsRoutingFunction, RoutingFunction, SiteRouting} from '../src';
  */
 function rewriter(routing: SiteRouting): (uri: string) => string {
   const stack = new Stack(new App(), 'TestStack');
-  new RoutingFunction(stack, 'Fn', routing);
+  new RoutingFunctionJs(stack, 'Fn', routing);
 
   const resource = Object.values(Template.fromStack(stack).findResources('AWS::CloudFront::Function'))[0];
   const code: string = resource.Properties.FunctionCode;
@@ -18,19 +19,31 @@ function rewriter(routing: SiteRouting): (uri: string) => string {
   return (uri: string) => handler({request: {uri}}).uri;
 }
 
-describe('needsRoutingFunction', () => {
-  it.each([
-    [SiteRouting.DIRECTORY_INDEX, true],
-    [SiteRouting.HTML_EXTENSION, true],
-    [SiteRouting.SPA, false],
-    [SiteRouting.NONE, false],
-  ])('%s -> %s', (routing, expected) => {
-    expect(needsRoutingFunction(routing)).toBe(expected);
-  });
-
+describe('RoutingFunctionJs', () => {
   it.each([SiteRouting.SPA, SiteRouting.NONE])('throws when constructed for %s', (routing) => {
     const stack = new Stack(new App(), 'TestStack');
-    expect(() => new RoutingFunction(stack, 'Fn', routing)).toThrow(/not implemented with a CloudFront Function/);
+    expect(() => new RoutingFunctionJs(stack, 'Fn', routing)).toThrow(/not implemented with a CloudFront Function/);
+  });
+
+  it('pins the runtime rather than inheriting the consumer feature flag', () => {
+    // Left unset, CDK picks 1.0 or 2.0 from the consuming app's cdk.json, so
+    // the same construct would deploy differently in different repos.
+    const stack = new Stack(new App(), 'TestStack');
+    new RoutingFunctionJs(stack, 'Fn', SiteRouting.DIRECTORY_INDEX);
+
+    Template.fromStack(stack).hasResourceProperties('AWS::CloudFront::Function', {
+      FunctionConfig: Match.objectLike({Runtime: 'cloudfront-js-2.0'}),
+    });
+    expect(DEFAULT_ROUTING_FUNCTION_RUNTIME.value).toBe('cloudfront-js-2.0');
+  });
+
+  it('lets a caller override the runtime', () => {
+    const stack = new Stack(new App(), 'TestStack');
+    new RoutingFunctionJs(stack, 'Fn', SiteRouting.DIRECTORY_INDEX, {runtime: FunctionRuntime.JS_1_0});
+
+    Template.fromStack(stack).hasResourceProperties('AWS::CloudFront::Function', {
+      FunctionConfig: Match.objectLike({Runtime: 'cloudfront-js-1.0'}),
+    });
   });
 });
 

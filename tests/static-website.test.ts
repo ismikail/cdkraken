@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {App, Stack} from 'aws-cdk-lib';
 import {Match, Template} from 'aws-cdk-lib/assertions';
 import {Certificate} from 'aws-cdk-lib/aws-certificatemanager';
-import {AppWebsite, SITE_PRESETS, SiteRouting} from '../src';
+import {SITE_PRESETS, SiteRouting, StaticWebsite} from '../src';
 
 /** BucketDeployment needs a real directory to stage, so build one per suite. */
 let buildPath: string;
@@ -18,7 +18,7 @@ afterAll(() => {
   fs.rmSync(buildPath, {recursive: true, force: true});
 });
 
-function synth(props: Partial<Parameters<typeof AppWebsite.prototype.constructor>[2]> = {}): Template {
+function synth(props: Partial<Parameters<typeof StaticWebsite.prototype.constructor>[2]> = {}): Template {
   const stack = new Stack(new App(), 'TestStack', {env: {account: '111111111111', region: 'us-east-1'}});
   const certificate = Certificate.fromCertificateArn(
     stack,
@@ -26,7 +26,7 @@ function synth(props: Partial<Parameters<typeof AppWebsite.prototype.constructor
     'arn:aws:acm:us-east-1:111111111111:certificate/abc-123',
   );
 
-  new AppWebsite(stack, 'Site', {
+  new StaticWebsite(stack, 'Site', {
     buildPath,
     certificate,
     domainNames: ['example.com'],
@@ -36,7 +36,7 @@ function synth(props: Partial<Parameters<typeof AppWebsite.prototype.constructor
   return Template.fromStack(stack);
 }
 
-describe('AppWebsite', () => {
+describe('StaticWebsite', () => {
   it('keeps the origin bucket private and encrypted', () => {
     synth().hasResourceProperties('AWS::S3::Bucket', {
       PublicAccessBlockConfiguration: {

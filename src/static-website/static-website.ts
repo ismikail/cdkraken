@@ -1,5 +1,5 @@
 import {Construct} from 'constructs';
-import {type AppWebsiteProps, SITE_PRESETS} from './interface';
+import {SITE_PRESETS, type StaticWebsiteProps} from './interface';
 import {SiteBucket} from './site-bucket';
 import {SiteDistribution} from './site-distribution';
 
@@ -18,7 +18,7 @@ import {SiteDistribution} from './site-distribution';
  *
  * @example SvelteKit (adapter-static) — the default
  * ```ts
- * new AppWebsite(this, 'Site', {
+ * new StaticWebsite(this, 'Site', {
  *   buildPath: path.join(__dirname, '../../web/build'),
  *   certificate,
  *   domainNames: ['example.com', 'www.example.com'],
@@ -27,7 +27,7 @@ import {SiteDistribution} from './site-distribution';
  *
  * @example A React SPA
  * ```ts
- * new AppWebsite(this, 'Site', {
+ * new StaticWebsite(this, 'Site', {
  *   buildPath: path.join(__dirname, '../../app/dist'),
  *   certificate,
  *   domainNames: ['app.example.com'],
@@ -35,14 +35,14 @@ import {SiteDistribution} from './site-distribution';
  * });
  * ```
  *
- * Static hosting only. A framework running server-side (SvelteKit
- * `adapter-node`, Next.js SSR) needs a compute origin instead.
+ * Static hosting only, as the name says. A framework running server-side
+ * (SvelteKit `adapter-node`, Next.js SSR) needs a compute origin instead.
  */
-export class AppWebsite extends Construct {
+export class StaticWebsite extends Construct {
   public readonly bucket: SiteBucket;
   public readonly distribution: SiteDistribution;
 
-  constructor(scope: Construct, id: string, props: AppWebsiteProps) {
+  constructor(scope: Construct, id: string, props: StaticWebsiteProps) {
     super(scope, id);
 
     const {buildPath, certificate, domainNames, comment, preset = SITE_PRESETS.SVELTEKIT_STATIC} = props;

@@ -3,6 +3,7 @@ import {BlockPublicAccess, Bucket, BucketEncryption} from 'aws-cdk-lib/aws-s3';
 import {BucketDeployment, CacheControl, Source} from 'aws-cdk-lib/aws-s3-deployment';
 import type {Construct} from 'constructs';
 import type {DeployStaticWebsiteOptions, SiteBucketProps} from './interface';
+import {toDeploymentGlob} from './utils';
 
 /** One year, the maximum meaningful `max-age` for content-hashed assets. */
 const IMMUTABLE_CACHE = [CacheControl.maxAge(Duration.days(365)), CacheControl.immutable(), CacheControl.setPublic()];
@@ -72,7 +73,7 @@ export class SiteBucket extends Bucket {
       ];
     }
 
-    const globs = this.immutablePaths.map((p) => `${p.replace(/\/+$/, '')}/*`);
+    const globs = this.immutablePaths.map(toDeploymentGlob);
 
     // Hashed assets first, so a freshly-uploaded index.html never references a
     // bundle that has not landed yet.
