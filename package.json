@@ -21,8 +21,6 @@
     "@biomejs/biome": "2.5.2",
     "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.0.1",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "aws-cdk-lib": "^2.257.0",

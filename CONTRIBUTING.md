@@ -69,10 +69,23 @@ immediately rather than in CI. If a commit is already written, `git commit
 ## Releases
 
 You never bump a version or publish by hand. Merging to `main` runs the release
-workflow, which tests, builds, works out the version from the commits, updates
-`CHANGELOG.md`, tags, cuts a GitHub release, and publishes to npm with
-provenance. If no commit since the last release warrants one, nothing is
-published — that is expected, not a failure.
+workflow, which tests, builds, works out the version from the commits, tags it,
+cuts a GitHub release with the notes, and publishes to npm with provenance. If
+no commit since the last release warrants one, nothing is published — that is
+expected, not a failure.
+
+Two consequences worth knowing:
+
+- **The release notes live in [GitHub Releases](https://github.com/ismikail/cdkraken/releases),
+  not in a `CHANGELOG.md`.** semantic-release would normally commit a changelog
+  back to `main`, but `main` is protected and the Actions bot cannot bypass it.
+  Rather than issue the workflow a GitHub App token with bypass rights — a lot
+  of moving parts for a project this size — the commit-back step is simply
+  dropped.
+- **`version` in `package.json` stays `0.0.0-development`.** That is deliberate.
+  semantic-release sets the real version at publish time, so the number in git
+  is never the source of truth; the registry and the git tags are. Do not
+  "fix" it.
 
 ## Writing constructs
 
