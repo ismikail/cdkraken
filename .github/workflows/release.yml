@@ -40,6 +40,11 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
+      # Trusted publishing needs npm >= 11.5.1 to exchange the Actions OIDC
+      # token for a short-lived credential. Node 22 ships npm 10.x.
+      - name: Upgrade npm
+        run: npm install -g npm@latest
+
       - run: npm ci
 
       - name: Run tests
@@ -48,8 +53,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      # No NPM_TOKEN. @semantic-release/npm runs with npmPublish false, so it
+      # only rewrites the version; @semantic-release/exec then runs `npm
+      # publish`, which authenticates against the trusted publisher configured
+      # on npmjs.com using the OIDC token from `id-token: write`. Nothing
+      # long-lived is stored in this repository.
       - name: Semantic release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release ${{ inputs.dry-run && '--dry-run' || '' }}
