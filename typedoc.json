@@ -1,0 +1,15 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "tsconfig": "tsconfig.json",
+  "out": "docs/typedoc",
+  "plugin": ["typedoc-plugin-markdown"],
+  "cleanOutputDir": true,
+  "excludeReferences": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "sort": ["source-order"],
+  "hideGenerator": true,
+  "outputFileStrategy": "modules"
+}

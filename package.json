@@ -1,0 +1,78 @@
+{
+  "name": "cdkraken",
+  "version": "0.0.0-development",
+  "description": "Release the CDKraken — reusable AWS CDK construct wrappers that tame your infrastructure",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf lib",
+    "watch": "tsc -w",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "format": "biome format --write",
+    "docs:clean": "rm -rf docs/typedoc",
+    "docs:generate": "npm run docs:clean && typedoc",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.2",
+    "@commitlint/cli": "^21.2.0",
+    "@commitlint/config-conventional": "^21.0.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "aws-cdk-lib": "^2.257.0",
+    "constructs": "^10.5.0",
+    "husky": "^9.1.7",
+    "jest": "^30.4.2",
+    "semantic-release": "^24.2.3",
+    "ts-jest": "^29.3.2",
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.28.7",
+    "typedoc-plugin-markdown": "^4.12.0",
+    "typescript": "~5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.257.0",
+    "constructs": "^10.5.0"
+  },
+  "keywords": [
+    "aws",
+    "aws-cdk",
+    "cdk",
+    "constructs",
+    "cloudfront",
+    "s3",
+    "static-site",
+    "sveltekit",
+    "react",
+    "astro",
+    "infrastructure-as-code"
+  ],
+  "author": "Miguel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ismikail/cdkraken.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ismikail/cdkraken/issues"
+  },
+  "homepage": "https://github.com/ismikail/cdkraken#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "lib/**/*",
+    "README.md",
+    "LICENSE"
+  ]
+}
