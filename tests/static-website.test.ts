@@ -48,6 +48,12 @@ describe('custom domains', () => {
     expect(dist.Properties.DistributionConfig.ViewerCertificate).toBeUndefined();
   });
 
+  it('allows a certificate with no domain names', () => {
+    // CDK documents this as the way to move an alternate domain name between
+    // distributions, so the validation must stay one-directional.
+    expect(() => synth({domainNames: undefined})).not.toThrow();
+  });
+
   it('rejects domain names without a certificate at synth time', () => {
     // CloudFront refuses aliases with no ACM certificate, but CDK does not
     // check — left alone this surfaces part-way through a deploy instead.
@@ -78,6 +84,15 @@ describe('custom domains', () => {
 
     // Two per site; a stack-scoped output would have collided on the second.
     expect(Object.keys(Template.fromStack(stack).findOutputs('*'))).toHaveLength(4);
+  });
+
+  it('exposes the distribution domain for stack outputs', () => {
+    const stack = new Stack(new App(), 'TestStack', {env: {account: '111111111111', region: 'us-east-1'}});
+    const site = new StaticWebsite(stack, 'Site', {buildPath});
+
+    expect(stack.resolve(site.distributionDomainName)).toEqual({
+      'Fn::GetAtt': [expect.stringContaining('SiteDistribution'), 'DomainName'],
+    });
   });
 
   it('still applies routing and caching without a certificate', () => {
